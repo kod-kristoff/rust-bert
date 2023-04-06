@@ -15,10 +15,7 @@ if __name__ == "__main__":
     (target_path / 'pytorch_model.bin').open('wb').write(r.content)
 
     weights = torch.load(target_path / 'pytorch_model.bin', map_location='cpu')
-    nps = {}
-    for k, v in weights.items():
-        nps[k] = np.ascontiguousarray(v.cpu().numpy())
-
+    nps = {k: np.ascontiguousarray(v.cpu().numpy()) for k, v in weights.items()}
     np.savez(target_path / 'model.npz', **nps)
 
     source = str(target_path / 'model.npz')
@@ -27,7 +24,16 @@ if __name__ == "__main__":
     toml_location = (Path(__file__).resolve() / '..' / '..' / 'Cargo.toml').resolve()
 
     subprocess.call(
-        ['cargo', 'run', '--bin=convert-tensor', '--manifest-path=%s' % toml_location, '--', source, target])
+        [
+            'cargo',
+            'run',
+            '--bin=convert-tensor',
+            f'--manifest-path={toml_location}',
+            '--',
+            source,
+            target,
+        ]
+    )
 
     os.remove(str(target_path / 'pytorch_model.bin'))
     os.remove(str(target_path / 'model.npz'))
