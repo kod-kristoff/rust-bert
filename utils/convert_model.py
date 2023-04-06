@@ -40,19 +40,17 @@ if __name__ == "__main__":
     nps = {}
     for k, v in weights.items():
         k = k.replace("gamma", "weight").replace("beta", "bias")
-        if args.skip_embeddings:
-            if k in {
-                "model.encoder.embed_tokens.weight",
-                "encoder.embed_tokens.weight",
-                "model.decoder.embed_tokens.weight",
-                "decoder.embed_tokens.weight",
-            }:
-                continue
-        if args.skip_lm_head:
-            if k in {
-                "lm_head.weight",
-            }:
-                continue
+        if args.skip_embeddings and k in {
+            "model.encoder.embed_tokens.weight",
+            "encoder.embed_tokens.weight",
+            "model.decoder.embed_tokens.weight",
+            "decoder.embed_tokens.weight",
+        }:
+            continue
+        if args.skip_lm_head and k in {
+            "lm_head.weight",
+        }:
+            continue
         if args.prefix:
             k = args.prefix + k
         if args.suffix:
@@ -77,9 +75,9 @@ if __name__ == "__main__":
             "cargo",
             "run",
             "--bin=convert-tensor",
-            "--manifest-path=%s" % toml_location,
+            f"--manifest-path={toml_location}",
             "--",
             source,
             target,
-        ],
+        ]
     )
